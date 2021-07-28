@@ -7,7 +7,7 @@ import shutil
 import os
 
 FPS = 15
-VM_NAME = "test2"
+VM_NAME = "test"
 screenshot_path = "machine_screenshot/"
 
 
@@ -19,30 +19,37 @@ class Machine:
     session = virtualbox.Session()
 
     def __init__(self):
+    	#Lookup for the virtual machine, if not found terminates
         try:
-            self.vm = self.vbox.find_machine('test2 Clone2 Clone')
+            self.vm = self.vbox.find_machine(VM_NAME)
         except virtualbox.library.VBoxErrorObjectNotFound :
             print("Machine not found")
             sys.exit(1)
+        #Set up directory to dave screnshoots    
         if os.path.exists(screenshot_path):
             shutil.rmtree(screenshot_path)
 
         os.makedirs(screenshot_path)
 
 
+	#Restore main snapshot
     def restore(self):
         snap = self.vm.find_snapshot("")
         self.vm.create_session(session=self.session)
 
         restoring = self.session.machine.restore_snapshot(snap)
-
+	
+		#Wait unit snapshot is restored
         while restoring.operation_percent < 100:
                 time.sleep(0.5)
 
         self.session.unlock_machine()
-
+			
+		#Starup virtual machine
         wait(self.vm.launch_vm_process(self.session,'headless',[]))
-
+	
+	
+	#Record virtual machine screen 
     def record(self):
         prev = 0
         ss = 0;
@@ -83,6 +90,7 @@ class Machine:
         #Remove screenshots
         shutil.rmtree(screenshot_path)
 
+	#Take virtualmachine snapshot
     def takeSnapshot(self):
         #while self.session.state != virtualbox.library. SessionState.locked:
         while self.session.machine.state != virtualbox.library.MachineState.powered_off:
