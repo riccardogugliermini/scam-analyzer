@@ -30,6 +30,8 @@ class Machine:
             shutil.rmtree(screenshot_path)
 
         os.makedirs(screenshot_path)
+        
+       
 
 
 	#Restore main snapshot
@@ -47,8 +49,12 @@ class Machine:
 			
 		#Starup virtual machine
         wait(self.vm.launch_vm_process(self.session,'headless',[]))
-	
-	
+        
+        #Start capturing traffic
+        self.caputreNetwork()
+        
+        #self.gs = self.session.console.guest.create_session("User", "user")
+			
 	#Record virtual machine screen 
     def record(self):
         prev = 0
@@ -96,7 +102,17 @@ class Machine:
         while self.session.machine.state != virtualbox.library.MachineState.powered_off:
             time.sleep(0.5)
         self.session.machine.take_snapshot(str(time.time()),"", True)
-
+    
+    #Capture virtual machine network traffic
+    def caputreNetwork(self):
+    	adapter = self.session.machine.get_network_adapter(0)
+    	adapter.trace_file = os.path.abspath('vm-network-traffic.pcap')
+    	adapter.trace_enabled = True
+    	
+    def getSSLKeysFile(self):
+    	p = self.gs.file_copy_from_guest("C:\\Users\\User\\AppData\\Local\\Keys\\keys.log",  "~/test/keys/keys.log",[])
+    	p.wait_for_completion()
+    	print(p.error_info.text)
 
 
 
