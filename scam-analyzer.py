@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import shutil
 import os
+import pexpect
 
 FPS = 15
 VM_NAME = "test"
@@ -101,7 +102,9 @@ class Machine:
         #while self.session.state != virtualbox.library. SessionState.locked:
         while self.session.machine.state != virtualbox.library.MachineState.powered_off:
             time.sleep(0.5)
-        self.session.machine.take_snapshot(str(time.time()),"", True)
+        snap_name = str(time.time())
+        self.session.machine.take_snapshot(snap_name,"", True)
+        self.snap_uuid = self.session.machine.find_snapshot(snap_name).id_p
     
     #Capture virtual machine network traffic
     def caputreNetwork(self):
@@ -113,10 +116,29 @@ class Machine:
     	p = self.gs.file_copy_from_guest("C:\\Users\\User\\AppData\\Local\\Keys\\keys.log",  "~/test/keys/keys.log",[])
     	p.wait_for_completion()
     	print(p.error_info.text)
-
-
-
+    
+    def getHD_UUID(self):
+    	for m in self.session.machine.medium_attachments:
+    		if m.type_p == "HardDisk":
+    			self.hdd_uuid = m.medium.id_p
+    
+    
+    def mountVDIs(self):
+		for m in self.vm.medium_attachments:
+			if m.type_p == virtualbox.library.DeviceType.hard_disk:
+				self.hdd_uuid = m.medium.id_p
+						
+		os.system("sudo echo user_allow_other >> /etc/fuse.conf ")
+		os.system("mkdir hd-mount/")
+		os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root hd-mount")
+		os.system("mkdir snap-mount/")
+		os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root snap-mount")
+		os.system("sudo mount hd-mount/vhdd /mnt")
+		os.system("sudo mount snap-mount/vhdd /mnt")
+		
+		
 m = Machine()
 m.restore()
 m.record()
 m.takeSnapshot()
+#m.mountVDIs()
