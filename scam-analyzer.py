@@ -18,6 +18,8 @@ def wait(sth):
 class Machine:
     vbox = virtualbox.VirtualBox()
     session = virtualbox.Session()
+    #hdd_uuid = ""
+    #snap_uuid = ""
 
     def __init__(self):
     	#Lookup for the virtual machine, if not found terminates
@@ -105,6 +107,7 @@ class Machine:
         snap_name = str(time.time())
         self.session.machine.take_snapshot(snap_name,"", True)
         self.snap_uuid = self.session.machine.find_snapshot(snap_name).id_p
+        self.getHD_UUID()
     
     #Capture virtual machine network traffic
     def caputreNetwork(self):
@@ -118,27 +121,28 @@ class Machine:
     	print(p.error_info.text)
     
     def getHD_UUID(self):
-    	for m in self.session.machine.medium_attachments:
-    		if m.type_p == "HardDisk":
+    	for m in self.vm.medium_attachments:
+    		if m.type_p == virtualbox.library.DeviceType.hard_disk:
     			self.hdd_uuid = m.medium.id_p
+    			print("HELLOOOO")
     
     
     def mountVDIs(self):
-		for m in self.vm.medium_attachments:
-			if m.type_p == virtualbox.library.DeviceType.hard_disk:
-				self.hdd_uuid = m.medium.id_p
-						
-		os.system("sudo echo user_allow_other >> /etc/fuse.conf ")
 		os.system("mkdir hd-mount/")
 		os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root hd-mount")
 		os.system("mkdir snap-mount/")
 		os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root snap-mount")
-		os.system("sudo mount hd-mount/vhdd /mnt")
-		os.system("sudo mount snap-mount/vhdd /mnt")
+		os.system("mkdir -p mnt/hdd")
+		os.system("mkdir -p mnt/snap")
 		
 		
 m = Machine()
 m.restore()
 m.record()
 m.takeSnapshot()
-#m.mountVDIs()
+m.mountVDIs()
+print("HD ID:")
+print(m.hdd_uuid)
+print("")
+print("SNAP ID:")
+print(m.snap_uuid)
