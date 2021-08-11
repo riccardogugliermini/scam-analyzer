@@ -51,7 +51,7 @@ class Machine:
         self.session.unlock_machine()
 			
 		#Starup virtual machine
-        wait(self.vm.launch_vm_process(self.session,'headless',[]))
+        wait(self.vm.launch_vm_process(self.session,'gui',[]))
         
         #Start capturing traffic
         self.caputreNetwork()
@@ -102,12 +102,12 @@ class Machine:
 	#Take virtualmachine snapshot
     def takeSnapshot(self):
         #while self.session.state != virtualbox.library. SessionState.locked:
-        while self.session.machine.state != virtualbox.library.MachineState.powered_off:
+        while self.vm.state != virtualbox.library.MachineState.powered_off:
             time.sleep(0.5)
         snap_name = str(time.time())
         self.session.machine.take_snapshot(snap_name,"", True)
-        self.snap_uuid = self.session.machine.find_snapshot(snap_name).id_p
-        self.getHD_UUID()
+        self.snap_uuid = self.getHD_UUID(snap_name)
+        self.hdd_uuid = self.getHD_UUID("")
     
     #Capture virtual machine network traffic
     def caputreNetwork(self):
@@ -120,20 +120,19 @@ class Machine:
     	p.wait_for_completion()
     	print(p.error_info.text)
     
-    def getHD_UUID(self):
-    	for m in self.vm.medium_attachments:
+    def getHD_UUID(self, snap_name):
+    	snap = self.vm.find_snapshot(snap_name)
+    	for m in snap.machine.medium_attachments:
     		if m.type_p == virtualbox.library.DeviceType.hard_disk:
-    			self.hdd_uuid = m.medium.id_p
-    			print("HELLOOOO")
-    
-    
+    			return m.medium.id_p
+    			
     def mountVDIs(self):
-		os.system("mkdir " + HDD_PATH)
-		os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root " + HDD_PATH)
-		os.system("mkdir " + SNAP_PATH)
-		os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root " + SNAP_PATH)
-		os.system("mkdir -p mnt/hdd")
-		os.system("mkdir -p mnt/snap")
+    	os.system("mkdir " + config.HDD_PATH)
+    	os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root " + config.HDD_PATH)
+    	os.system("mkdir " + config.SNAP_PATH)
+    	os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root " + config.SNAP_PATH)
+    	os.system("mkdir -p mnt/hdd")
+    	os.system("mkdir -p mnt/snap")
 		
 		
 m = Machine()
