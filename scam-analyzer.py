@@ -5,7 +5,7 @@ import numpy as np
 import glob
 import shutil
 import os
-import pexpect
+import config
 
 FPS = 15
 VM_NAME = "test"
@@ -128,10 +128,10 @@ class Machine:
     
     
     def mountVDIs(self):
-		os.system("mkdir hd-mount/")
-		os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root hd-mount")
-		os.system("mkdir snap-mount/")
-		os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root snap-mount")
+		os.system("mkdir " + HDD_PATH)
+		os.system("vboximg-mount -i "+self.hdd_uuid+" -o allow_root " + HDD_PATH)
+		os.system("mkdir " + SNAP_PATH)
+		os.system("vboximg-mount -i "+self.snap_uuid+" -o allow_root " + SNAP_PATH)
 		os.system("mkdir -p mnt/hdd")
 		os.system("mkdir -p mnt/snap")
 		
