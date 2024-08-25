@@ -25,8 +25,7 @@ To get started with the Tech Scam Analysis Tool, follow the steps below:
 - **Oracle VirtualBox**: Ensure that Oracle VirtualBox is installed on your machine. You can download it from [here](https://www.virtualbox.org/wiki/Downloads).
 - **Python 3.x**: Make sure Python is installed on your system. You can download it from [here](https://www.python.org/downloads/).
 - **VirtualBox Python Library (`pyvbox`)**: This library is required to interact with VirtualBox through Python. Install it using pip:
-  ```bash
-  pip install pyvbox ```
+  ```bash pip install pyvbox ```
 - **Other Dependencies**: Additional Python packages can be installed using:
 ```pip install -r requirements.txt```
 
@@ -58,10 +57,10 @@ The tool is divided into two main Python scripts:
 
 The analysis tool generates detailed reports on the modifications made by the scammer on the virtual machine, including:
 
-	•	Files created
-	•	Files edited
-	•	Files deleted
-	•	Network traffic details
+- Files created
+- Files edited
+- Files deleted
+- Network traffic details
 
 These reports can be used to study the behavior of scammers and develop strategies to prevent future scams.
 
